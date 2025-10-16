@@ -78,15 +78,6 @@ def receber_corrente(payload: Dados):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
-
-# 🔹 Bloco para rodar corretamente no Railway
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))  # Railway define a porta automaticamente
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
-
-
 # Retornar histórico (últimas 50 leituras)
 @app.get("/historico")
 def listar_dados():
@@ -96,3 +87,10 @@ def listar_dados():
         return rows
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# 🔹 Bloco para rodar corretamente no Railway
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))  # Railway define a porta automaticamente
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
