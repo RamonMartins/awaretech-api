@@ -20,39 +20,72 @@ try:
 except Exception as e:
     raise RuntimeError(f"Erro ao conectar ao banco: {e}")
 
-# Criar tabela caso não exista
+# Cria tabela sensor_vibracao
 cur.execute("""
-CREATE TABLE IF NOT EXISTS leituras (
+CREATE TABLE IF NOT EXISTS sensor_vibracao (
     id SERIAL PRIMARY KEY,
-    sensor1 FLOAT NOT NULL,
-    sensor2 FLOAT NOT NULL,
-    timestamp TIMESTAMP NOT NULL
+    leitura FLOAT NOT NULL,
+    data_criacao TIMESTAMP NOT NULL
+)
+""")
+conn.commit()
+
+# Cria tabela sensor_corrente_1
+cur.execute("""
+CREATE TABLE IF NOT EXISTS sensor_corrente_1 (
+    id SERIAL PRIMARY KEY,
+    leitura FLOAT NOT NULL,
+    data_criacao TIMESTAMP NOT NULL
 )
 """)
 conn.commit()
 
 # Modelo de dados do ESP32
 class Dados(BaseModel):
-    sensor1: float
-    sensor2: float
+    leitura_sensor: float
 
 # Rota raiz
 @app.get("/")
 def raiz():
     return {"mensagem": "API do ESP32 está online 🚀"}
 
-# Receber dados do ESP32
-@app.post("/dados")
-def receber_dados(dados: Dados):
+
+# Receber Sensor de vibração
+@app.post("/enviar_sensor_vibracao")
+def receber_vibracao(payload: Dados):
     try:
         cur.execute(
-            "INSERT INTO leituras (sensor1, sensor2, timestamp) VALUES (%s, %s, %s)",
-            (dados.sensor1, dados.sensor2, datetime.now())
+            "INSERT INTO sensor_vibracao (leitura, data_criacao) VALUES (%s, %s)",
+            (payload.leitura_sensor, datetime.now())
         )
         conn.commit()
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Receber Sensor de corrente
+@app.post("/enviar_sensor_corrente")
+def receber_corrente(payload: Dados):
+    try:
+        cur.execute(
+            "INSERT INTO sensor_corrente_1 (leitura, data_criacao) VALUES (%s, %s)",
+            (payload.leitura_sensor, datetime.now())
+        )
+        conn.commit()
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+# 🔹 Bloco para rodar corretamente no Railway
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))  # Railway define a porta automaticamente
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
+
 
 # Retornar histórico (últimas 50 leituras)
 @app.get("/historico")
@@ -63,9 +96,3 @@ def listar_dados():
         return rows
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-# 🔹 Bloco para rodar corretamente no Railway
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))  # Railway define a porta automaticamente
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
