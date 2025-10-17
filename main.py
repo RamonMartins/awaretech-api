@@ -90,45 +90,45 @@ def aux_historico(tabela: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-##### Rota receber última leitura Sensor de vibração 
+##### Rota RECEBER última leitura Sensor de vibração 
 @app.get("/ultimo_sensor_vibracao")
 def ultimo_vibracao():
     return aux_ultima_leitura(tab_sensor_vibracao)
 
-##### Rota receber histórico Sensor de vibração
+##### Rota RECEBER histórico Sensor de vibração
 @app.get("/historico_sensor_vibracao")
 def historico_vibracao():
     return aux_historico(tab_sensor_vibracao)
 
 
-##### Rota receber última leitura Sensor de corrente 1
+##### Rota RECEBER última leitura Sensor de corrente 1
 @app.get("/ultimo_sensor_corrente_1")
 def ultimo_corrente_1():
     return aux_ultima_leitura(tab_sensor_corrente_1)
 
-##### Rota receber histórico Sensor de corrente 1
+##### Rota RECEBER histórico Sensor de corrente 1
 @app.get("/historico_sensor_corrente_1")
 def historico_corrente_1():
     return aux_historico(tab_sensor_corrente_1)
 
 
-##### Rota receber última leitura Sensor de corrente 2
+##### Rota RECEBER última leitura Sensor de corrente 2
 @app.get("/ultimo_sensor_corrente_2")
 def ultimo_corrente_2():
     return aux_ultima_leitura(tab_sensor_corrente_2)
 
-##### Rota receber histórico Sensor de corrente 2
+##### Rota RECEBER histórico Sensor de corrente 2
 @app.get("/historico_sensor_corrente_2")
 def historico_corrente_2():
     return aux_historico(tab_sensor_corrente_2)
 
 
-##### Rota receber última leitura Sensor de corrente 3
+##### Rota RECEBER última leitura Sensor de corrente 3
 @app.get("/ultimo_sensor_corrente_3")
 def ultimo_corrente_3():
     return aux_ultima_leitura(tab_sensor_corrente_3)
 
-##### Rota receber histórico Sensor de corrente 3
+##### Rota RECEBER histórico Sensor de corrente 3
 @app.get("/historico_sensor_corrente_3")
 def historico_corrente_3():
     return aux_historico(tab_sensor_corrente_3)
@@ -176,6 +176,58 @@ def enviar_corrente_2(payload: Dados):
 @app.post("/enviar_sensor_corrente_3")
 def enviar_corrente_3(payload: Dados):
     return aux_enviar_leitura(tab_sensor_corrente_3, payload)
+
+
+######### Rotas DELETE #########
+
+# Função auxiliar para limpar tabela
+def aux_limpar_tabela(tabela: str):
+    try:
+        with psycopg2.connect(DATABASE_URL, sslmode='require', cursor_factory=RealDictCursor) as conn:
+            with conn.cursor() as cur:
+                cur.execute(f"TRUNCATE TABLE {tabela} RESTART IDENTITY")
+                conn.commit()
+        return {"status": "ok", "mensagem": f"Tabela {tabela} limpa com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+##### Rota LIMPAR Sensor de vibração
+@app.delete("/limpar_sensor_vibracao")
+def limpar_vibracao():
+    return aux_limpar_tabela(tab_sensor_vibracao)
+
+##### Rota LIMPAR Sensor de corrente 1
+@app.delete("/limpar_sensor_corrente_1")
+def limpar_corrente_1():
+    return aux_limpar_tabela(tab_sensor_corrente_1)
+
+##### Rota LIMPAR Sensor de corrente 2
+@app.delete("/limpar_sensor_corrente_2")
+def limpar_corrente_2():
+    return aux_limpar_tabela(tab_sensor_corrente_2)
+
+##### Rota LIMPAR Sensor de corrente 3
+@app.delete("/limpar_sensor_corrente_3")
+def limpar_corrente_3():
+    return aux_limpar_tabela(tab_sensor_corrente_3)
+
+##### Rota LIMPAR todas as tabelas
+@app.delete("/limpar_todas_tabelas")
+def limpar_todas_tabelas():
+    tabelas = [
+        tab_sensor_vibracao,
+        tab_sensor_corrente_1,
+        tab_sensor_corrente_2,
+        tab_sensor_corrente_3
+    ]
+    resultados = {}
+    for tabela in tabelas:
+        try:
+            resultados[tabela] = aux_limpar_tabela(tabela)
+        except HTTPException as e:
+            resultados[tabela] = {"status": "erro", "mensagem": str(e.detail)}
+    return resultados
 
 
 # 🔹 Bloco para rodar corretamente no Railway
