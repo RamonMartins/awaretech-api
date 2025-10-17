@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from zoneinfo import ZoneInfo
 
 app = FastAPI(title="API ESP32 FastAPI + PostgreSQL")
 
@@ -148,7 +149,7 @@ def aux_enviar_leitura(tabela: str, payload: Dados):
                 # Gravar os dados
                 cur.execute(
                     f"INSERT INTO {tabela} (leitura, data_criacao) VALUES (%s, %s)",
-                    (payload.leitura_sensor, datetime.now())
+                    (payload.leitura_sensor, datetime.now(ZoneInfo("America/Sao_Paulo")))
                 )
                 conn.commit()
         return {"status": "ok"}
