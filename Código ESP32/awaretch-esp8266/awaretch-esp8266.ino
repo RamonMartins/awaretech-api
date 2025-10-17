@@ -8,11 +8,15 @@ const char* password = "87654320";
 
 // URLs da API
 const char* enviar_sensor_vibracao = "https://awaretech-api.up.railway.app/enviar_sensor_vibracao";
-const char* enviar_sensor_corrente = "https://awaretech-api.up.railway.app/enviar_sensor_corrente";
+const char* enviar_sensor_corrente_1 = "https://awaretech-api.up.railway.app/enviar_sensor_corrente_1";
+const char* enviar_sensor_corrente_2 = "https://awaretech-api.up.railway.app/enviar_sensor_corrente_2";
+const char* enviar_sensor_corrente_3 = "https://awaretech-api.up.railway.app/enviar_sensor_corrente_3";
 
 // Simula leituras de sensores
-float sensor1 = 0;
-float sensor2 = 0;
+float sensor_vibracao = 0;
+float sensor_corrente_1 = 0;
+float sensor_corrente_2 = 0;
+float sensor_corrente_3 = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -28,14 +32,16 @@ void setup() {
 
 void loop() {
   // Atualiza valores dos sensores (simulação)
-  sensor1 = random(20, 30) + random(0, 100)/100.0;
-  sensor2 = random(100, 200) + random(0, 100)/100.0;
+  sensor_vibracao = random(20, 30) + random(0, 100)/100.0;
+  sensor_corrente_1 = random(100, 200) + random(0, 100)/100.0;
+  sensor_corrente_2 = random(50, 150) + random(0, 100)/100.0;
+  sensor_corrente_3 = random(10, 50) + random(0, 100)/100.0;
 
-  // Envia leitura do sensor 1
-  EnviarDados(enviar_sensor_vibracao, sensor1);
-
-  // Envia leitura do sensor 2
-  EnviarDados(enviar_sensor_corrente, sensor2);
+  // Envia leituras
+  EnviarDados(enviar_sensor_vibracao, sensor_vibracao);
+  EnviarDados(enviar_sensor_corrente_1, sensor_corrente_1);
+  EnviarDados(enviar_sensor_corrente_2, sensor_corrente_2);
+  EnviarDados(enviar_sensor_corrente_3, sensor_corrente_3);
 
   delay(5000); // Espera 5 segundos antes da próxima leitura
 }

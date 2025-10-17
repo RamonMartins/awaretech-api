@@ -4,7 +4,6 @@ from datetime import datetime
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from zoneinfo import ZoneInfo
 
 app = FastAPI(title="API ESP32 FastAPI + PostgreSQL")
 
@@ -32,7 +31,7 @@ def aux_criar_tabela(tabela: str):
                 CREATE TABLE IF NOT EXISTS {tabela} (
                     id SERIAL PRIMARY KEY,
                     leitura FLOAT NOT NULL,
-                    data_criacao TIMESTAMP WITH TIME ZONE NOT NULL
+                    data_criacao TIMESTAMP NOT NULL
                 )
                 """)
                 conn.commit()
@@ -149,7 +148,7 @@ def aux_enviar_leitura(tabela: str, payload: Dados):
                 # Gravar os dados
                 cur.execute(
                     f"INSERT INTO {tabela} (leitura, data_criacao) VALUES (%s, %s)",
-                    (payload.leitura_sensor, datetime.now(ZoneInfo("America/Sao_Paulo")))
+                    (payload.leitura_sensor, datetime.now())
                 )
                 conn.commit()
         return {"status": "ok"}
@@ -227,6 +226,32 @@ def limpar_todas_tabelas():
             resultados[tabela] = aux_limpar_tabela(tabela)
         except HTTPException as e:
             resultados[tabela] = {"status": "erro", "mensagem": str(e.detail)}
+    return resultados
+
+##### Rota para EXCLUIR todas as tabelas
+@app.delete("/excluir_todas_tabelas")
+def excluir_todas_tabelas():
+    tabelas = [
+        tab_sensor_vibracao,
+        tab_sensor_corrente_1,
+        tab_sensor_corrente_2,
+        tab_sensor_corrente_3
+    ]
+    
+    resultados = {}
+    try:
+        with psycopg2.connect(DATABASE_URL, sslmode='require') as conn:
+            with conn.cursor() as cur:
+                for tabela in tabelas:
+                    try:
+                        cur.execute(f"DROP TABLE IF EXISTS {tabela}")
+                        resultados[tabela] = {"status": "ok", "mensagem": "Tabela excluída com sucesso"}
+                    except Exception as e:
+                        resultados[tabela] = {"status": "erro", "mensagem": str(e)}
+                conn.commit()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao banco: {e}")
+
     return resultados
 
 
