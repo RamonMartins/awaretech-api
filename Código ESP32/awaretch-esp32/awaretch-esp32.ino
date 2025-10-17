@@ -6,8 +6,8 @@
 const char* ssid = "brisa-3012659";
 const char* password = "xs324hhh";
 
-const char* enviar_sensor_vibracao = "https://awaretech-api.up.railway.app/receber_sensor_vibracao";
-const char* enviar_sensor_corrente = "https://awaretech-api.up.railway.app/receber_sensor_corrente";
+const char* enviar_sensor_vibracao = "https://awaretech-api.up.railway.app/enviar_sensor_vibracao";
+const char* enviar_sensor_corrente = "https://awaretech-api.up.railway.app/enviar_sensor_corrente";
 
 // Simula leituras de sensores
 float sensor1 = 0;
