@@ -49,9 +49,10 @@ class Dados(BaseModel):
 def raiz():
     return {"mensagem": "API do ESP32 está online 🚀"}
 
+######################### Requisições POST #############################
 
 # Receber Sensor de vibração
-@app.post("/enviar_sensor_vibracao")
+@app.post("/receber_sensor_vibracao")
 def receber_vibracao(payload: Dados):
     try:
         cur.execute(
@@ -65,7 +66,7 @@ def receber_vibracao(payload: Dados):
 
 
 # Receber Sensor de corrente
-@app.post("/enviar_sensor_corrente")
+@app.post("/receber_sensor_corrente")
 def receber_corrente(payload: Dados):
     try:
         cur.execute(
@@ -77,14 +78,46 @@ def receber_corrente(payload: Dados):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+######################### Requisições GET #############################
 
-# Retornar histórico (últimas 50 leituras)
-@app.get("/historico")
-def listar_dados():
+# Retornar última leitura do Sensor de vibração
+@app.get("/ultimo_sensor_vibracao")
+def ultimo_vibracao():
     try:
-        cur.execute("SELECT * FROM leituras ORDER BY id DESC LIMIT 50")
-        rows = cur.fetchall()
-        return rows
+        cur.execute("SELECT * FROM sensor_vibracao ORDER BY id DESC LIMIT 1")
+        payload = cur.fetchall()
+        return payload
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Retornar histórico do Sensor de vibração (últimas 50 leituras)
+@app.get("/historico_sensor_vibracao")
+def historico_vibracao():
+    try:
+        cur.execute("SELECT * FROM sensor_vibracao ORDER BY id DESC LIMIT 50")
+        payload = cur.fetchall()
+        return payload
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Retornar última leitura do Sensor de corrente
+@app.get("/ultimo_sensor_corrente")
+def ultimo_corrente():
+    try:
+        cur.execute("SELECT * FROM sensor_corrente_1 ORDER BY id DESC LIMIT 1")
+        payload = cur.fetchall()
+        return payload
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Retornar histórico do Sensor de corrente (últimas 50 leituras)
+@app.get("/historico_sensor_corrente")
+def historico_corrente():
+    try:
+        cur.execute("SELECT * FROM sensor_corrente_1 ORDER BY id DESC LIMIT 50")
+        payload = cur.fetchall()
+        return payload
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
