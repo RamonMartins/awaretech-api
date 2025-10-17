@@ -32,7 +32,7 @@ def aux_criar_tabela(tabela: str):
                 CREATE TABLE IF NOT EXISTS {tabela} (
                     id SERIAL PRIMARY KEY,
                     leitura FLOAT NOT NULL,
-                    data_criacao TIMESTAMP NOT NULL
+                    data_criacao TIMESTAMP WITH TIME ZONE NOT NULL
                 )
                 """)
                 conn.commit()
