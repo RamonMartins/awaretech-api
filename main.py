@@ -63,6 +63,9 @@ def aux_ultima_leitura(tabela: str):
         # Conexão com PostgreSQL
         with psycopg2.connect(DATABASE_URL, sslmode='require', cursor_factory=RealDictCursor) as conn:
             with conn.cursor() as cur:
+                # Define o fuso horário da sessão
+                cur.execute("SET TIME ZONE 'America/Sao_Paulo';")
+
                 # Buscar dados
                 cur.execute(f"SELECT * FROM {tabela} ORDER BY id DESC LIMIT 1")
                 payload = cur.fetchone()
@@ -79,6 +82,9 @@ def aux_historico(tabela: str):
         # Conexão com PostgreSQL
         with psycopg2.connect(DATABASE_URL, sslmode='require', cursor_factory=RealDictCursor) as conn:
             with conn.cursor() as cur:
+                # Define o fuso horário da sessão
+                cur.execute("SET TIME ZONE 'America/Sao_Paulo';")
+
                 # Buscar dados
                 cur.execute(f"SELECT * FROM {tabela} ORDER BY id DESC LIMIT 50")
                 payload = cur.fetchall()
