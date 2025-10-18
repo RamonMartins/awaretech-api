@@ -89,7 +89,7 @@ def aux_historico(tabela: str):
                 cur.execute("SET TIME ZONE 'America/Sao_Paulo';")
 
                 # Buscar dados
-                cur.execute(f"SELECT * FROM {tabela} ORDER BY id DESC LIMIT 50")
+                cur.execute(f"SELECT * FROM {tabela} ORDER BY id ASC LIMIT 50")
                 payload = cur.fetchall()
                 if not payload:
                     return {"mensagem": "nenhum dado encontrado"}
