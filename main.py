@@ -73,7 +73,7 @@ def aux_ultima_leitura(tabela: str):
                 cur.execute(f"SELECT * FROM {tabela} ORDER BY id DESC LIMIT 1")
                 payload = cur.fetchone()
                 if payload is None:
-                    return [{"mensagem": "nenhum dado encontrado"}]
+                    return {"dados": [], "mensagem": "nenhum dado encontrado"}
                 else:
                     return payload
     except Exception as e:
@@ -92,7 +92,7 @@ def aux_historico(tabela: str):
                 cur.execute(f"SELECT * FROM {tabela} ORDER BY id ASC LIMIT 50")
                 payload = cur.fetchall()
                 if not payload:
-                    return [{"mensagem": "nenhum dado encontrado"}]
+                    return {"dados": [], "mensagem": "nenhum dado encontrado"}
                 else:
                     return payload
     except Exception as e:
