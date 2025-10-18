@@ -37,16 +37,39 @@ void loop() {
   sensor_corrente_2 = random(50, 150) + random(0, 100)/100.0;
   sensor_corrente_3 = random(10, 50) + random(0, 100)/100.0;
 
-  // Envia leituras
-  EnviarDados(enviar_sensor_vibracao, sensor_vibracao);
-  EnviarDados(enviar_sensor_corrente_1, sensor_corrente_1);
-  EnviarDados(enviar_sensor_corrente_2, sensor_corrente_2);
-  EnviarDados(enviar_sensor_corrente_3, sensor_corrente_3);
+  // Envia leitura Sensor de Vibração
+  if (sensor_vibracao >= 23 && sensor_vibracao <= 28){
+    EnviarDados(enviar_sensor_vibracao, sensor_vibracao, "Estável");
+  }else{
+    EnviarDados(enviar_sensor_vibracao, sensor_vibracao, "Instável");
+  }
+  
+  // Envia leitura Sensor de Corrente 1
+  if(sensor_corrente_1 >= 130 && sensor_corrente_1 <= 180){
+    EnviarDados(enviar_sensor_corrente_1, sensor_corrente_1, "Estável");
+  }else{
+    EnviarDados(enviar_sensor_corrente_1, sensor_corrente_1, "Instável");
+  }
+
+  // Envia leitura Sensor de Corrente 2
+  if(sensor_corrente_2 >= 80 && sensor_corrente_2 <= 120){
+    EnviarDados(enviar_sensor_corrente_2, sensor_corrente_2, "Estável");
+  }else{
+    EnviarDados(enviar_sensor_corrente_2, sensor_corrente_2, "Instável");
+  }
+
+  // Envia leitura Sensor de Corrente 3
+  if(sensor_corrente_3 >= 80 && sensor_corrente_3 <= 120){
+    EnviarDados(enviar_sensor_corrente_3, sensor_corrente_3, "Estável");
+  }else{
+    EnviarDados(enviar_sensor_corrente_3, sensor_corrente_3, "Instável");
+  }
+
 
   delay(5000); // Espera 5 segundos antes da próxima leitura
 }
 
-void EnviarDados(const char* endpoint, float leitura){
+void EnviarDados(const char* endpoint, float leitura, const char* status){
   if(WiFi.status()== WL_CONNECTED){
     HTTPClient http;
     
@@ -55,7 +78,8 @@ void EnviarDados(const char* endpoint, float leitura){
 
     // Monta JSON usando ArduinoJson ou manualmente
     String jsonPayload = "{";
-    jsonPayload += "\"leitura_sensor\": " + String(leitura, 2);
+    jsonPayload += "\"leitura_sensor\": " + String(leitura, 2) + ",";
+    jsonPayload += "\"status\": \"" + String(status) + "\"";
     jsonPayload += "}";
 
     int httpResponseCode = http.POST(jsonPayload);
