@@ -143,6 +143,44 @@ def historico_corrente_3():
     return aux_historico(tab_sensor_corrente_3)
 
 
+##### Rota RECEBER média dos 3 Sensores de corrente
+@app.get("/media_sensores_corrente")
+def media_corrente():
+    try:
+        with psycopg2.connect(DATABASE_URL, sslmode='require', cursor_factory=RealDictCursor) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SET TIME ZONE 'America/Sao_Paulo';")
+
+                def ultima_leitura(tabela: str):
+                    cur.execute(f"SELECT * FROM {tabela} ORDER BY id DESC LIMIT 1")
+                    row = cur.fetchone()
+                    # retorna None se não houver leitura
+                    return row["leitura"] if row and "leitura" in row else None
+
+                s1 = ultima_leitura(tab_sensor_corrente_1)
+                s2 = ultima_leitura(tab_sensor_corrente_2)
+                s3 = ultima_leitura(tab_sensor_corrente_3)
+
+                # Se qualquer leitura estiver ausente, retornamos mensagem indicando falta de dados
+                if s1 is None or s2 is None or s3 is None:
+                    return {"mensagem": "nenhum dado encontrado"}
+
+                media = (s1 + s2 + s3) / 3
+
+                return {
+                    "mensagem": "ok",
+                    "ultimas_leituras": {
+                        "corrente_1": s1,
+                        "corrente_2": s2,
+                        "corrente_3": s3
+                    },
+                    "media": media
+                }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 ######### Rotas POST #########
 
 # Modelo de dados do ESP32
