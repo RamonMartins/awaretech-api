@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from zoneinfo import ZoneInfo
 
 app = FastAPI(title="API ESP32 FastAPI + PostgreSQL")
 
@@ -32,6 +33,8 @@ def aux_criar_tabela(tabela: str):
                 CREATE TABLE IF NOT EXISTS {tabela} (
                     id SERIAL PRIMARY KEY,
                     leitura FLOAT NOT NULL,
+                    status TEXT,
+                    data_legivel TEXT NOT NULL,
                     data_criacao TIMESTAMP WITH TIME ZONE NOT NULL
                 )
                 """)
@@ -145,17 +148,21 @@ def historico_corrente_3():
 # Modelo de dados do ESP32
 class Dados(BaseModel):
     leitura_sensor: float
+    status: Optional[str] = None
 
 # Função auxiliar para envio de leituras
 def aux_enviar_leitura(tabela: str, payload: Dados):
     try:
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        data_legivel = agora.strftime("%d/%m/%Y %H:%M")
+        
         # Conexão com PostgreSQL
         with psycopg2.connect(DATABASE_URL, sslmode='require', cursor_factory=RealDictCursor) as conn:
             with conn.cursor() as cur:
                 # Gravar os dados
                 cur.execute(
-                    f"INSERT INTO {tabela} (leitura, data_criacao) VALUES (%s, %s)",
-                    (payload.leitura_sensor, datetime.now(ZoneInfo("America/Sao_Paulo")))
+                    f"INSERT INTO {tabela} (leitura, status, data_legivel, data_criacao) VALUES (%s, %s, %s, %s)",
+                    (payload.leitura_sensor, payload.status or "", data_legivel, agora)
                 )
                 conn.commit()
         return {"status": "ok"}
@@ -262,7 +269,7 @@ def excluir_todas_tabelas():
     return resultados
 
 
-# 🔹 Bloco para rodar corretamente no Railway
+# Bloco para rodar corretamente no Railway
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))  # Railway define a porta automaticamente
